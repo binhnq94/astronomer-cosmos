@@ -11,12 +11,13 @@ logger = getLogger(__name__)
 
 class AWSGlueProfileMapping(BaseProfileMapping):
     """
-        Maps Airflow Aws connections to Glue dbt profiles.
+    Maps Airflow Aws connections to Glue dbt profiles.
 
-        https://docs.getdbt.com/docs/core/connect-data-platform/glue-setup
-        https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
-        https://github.com/aws-samples/dbt-glue
+    https://docs.getdbt.com/docs/core/connect-data-platform/glue-setup
+    https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
+    https://github.com/aws-samples/dbt-glue
     """
+
     airflow_connection_type: str = "aws"
     is_community: bool = True
 
