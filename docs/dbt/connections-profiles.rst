@@ -192,12 +192,12 @@ Certificate
     :show-inheritance:
 
 
-Amazon web service(AWS Glue's Spark engine)
+AWS Glue's Spark engine
 ---------------------
 
-Glue role amazon resource name
+AWS role amazon resource name
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: cosmos.providers.dbt.core.profiles.aws.glue_role_arn.AwsGlueProfileMapping
+.. autoclass:: cosmos.providers.dbt.core.profiles.glue.aws_role_arn.AWSRoleARNProfileMapping
     :undoc-members:
     :members:
