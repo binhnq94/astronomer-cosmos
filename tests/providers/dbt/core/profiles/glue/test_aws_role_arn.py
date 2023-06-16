@@ -4,7 +4,9 @@ import pytest
 from airflow.models.connection import Connection
 
 from cosmos.providers.dbt.core.profiles import get_profile_mapping
-from cosmos.providers.dbt.core.profiles.aws.glue_role_arn import AWSGlueProfileMapping
+from cosmos.providers.dbt.core.profiles.glue.aws_role_arn import (
+    AWSRoleARNProfileMapping,
+)
 
 
 @pytest.fixture()
@@ -70,7 +72,7 @@ def test_connection_claiming() -> None:
 
         print("testing with extra:", values)
 
-        profile_mapping = AWSGlueProfileMapping(conn, profile_args_potential_values)
+        profile_mapping = AWSRoleARNProfileMapping(conn, profile_args_potential_values)
         assert not profile_mapping.can_claim_connection()
 
     # if we're missing any of the values in profile args, it shouldn't claim
@@ -81,12 +83,12 @@ def test_connection_claiming() -> None:
 
         print("testing with profile_args", values)
 
-        profile_mapping = AWSGlueProfileMapping(conn, values)
+        profile_mapping = AWSRoleARNProfileMapping(conn, values)
         assert not profile_mapping.can_claim_connection()
 
     # if we have them all, it should claim
     conn = Connection(**connection_attributes, extra=extra_potential_values)  # type: ignore
-    profile_mapping = AWSGlueProfileMapping(conn, profile_args_potential_values)
+    profile_mapping = AWSRoleARNProfileMapping(conn, profile_args_potential_values)
     assert profile_mapping.can_claim_connection()
 
 
@@ -106,7 +108,7 @@ def test_profile_mapping_selected(
             "location": "s3a://my_bucket",
         },
     )
-    assert isinstance(profile_mapping, AWSGlueProfileMapping)
+    assert isinstance(profile_mapping, AWSRoleARNProfileMapping)
 
 
 def test_profile_args(

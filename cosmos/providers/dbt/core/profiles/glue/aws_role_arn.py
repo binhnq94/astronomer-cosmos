@@ -9,7 +9,7 @@ from ..base import BaseProfileMapping
 logger = getLogger(__name__)
 
 
-class AWSGlueProfileMapping(BaseProfileMapping):
+class AWSRoleARNProfileMapping(BaseProfileMapping):
     """
     Maps Airflow Aws connections to Glue dbt profiles.
 
