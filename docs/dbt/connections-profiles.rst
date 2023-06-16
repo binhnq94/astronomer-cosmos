@@ -190,3 +190,14 @@ Certificate
     :undoc-members:
     :members:
     :show-inheritance:
+
+
+Amazon web service(AWS Glue's Spark engine)
+---------------------
+
+Glue role amazon resource name
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: cosmos.providers.dbt.core.profiles.aws.glue_role_arn.AwsGlueProfileMapping
+    :undoc-members:
+    :members:

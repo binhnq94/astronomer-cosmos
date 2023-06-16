@@ -6,6 +6,7 @@ from typing import Any, Type
 
 from airflow.hooks.base import BaseHook
 
+from .aws import AWSGlueProfileMapping
 from .base import BaseProfileMapping
 from .bigquery.service_account_file import GoogleCloudServiceAccountFileProfileMapping
 from .databricks.token import DatabricksTokenProfileMapping
@@ -29,6 +30,7 @@ profile_mappings: list[Type[BaseProfileMapping]] = [
     TrinoLDAPProfileMapping,
     TrinoCertificateProfileMapping,
     TrinoJWTProfileMapping,
+    AWSGlueProfileMapping,
 ]
 
 
