@@ -253,6 +253,7 @@ def render_project(
                 "profile_args": profile_args,
                 "profile_name": profile_name,
                 "target_name": target_name,
+                "on_warning_callback": on_warning_callback,
             },
         )
         entities[test_task.id] = test_task
