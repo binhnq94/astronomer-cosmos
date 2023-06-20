@@ -247,7 +247,13 @@ def render_project(
                 execution_mode=execution_mode,
                 dbt_class="DbtTest",
             ),
-            arguments={**task_args, **operator_args},
+            arguments={
+                **task_args,
+                **operator_args,
+                "profile_args": profile_args,
+                "profile_name": profile_name,
+                "target_name": target_name,
+            },
         )
         entities[test_task.id] = test_task
 
