@@ -241,7 +241,7 @@ def render_project(
     if test_behavior == "after_all":
         # make a test task
         test_task = Task(
-            id=f"{dbt_project_name}_test",
+            id=f"dbt_test",
             operator_class=calculate_operator_class(
                 execution_mode=execution_mode,
                 dbt_class="DbtTest",
