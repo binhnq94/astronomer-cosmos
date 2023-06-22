@@ -17,7 +17,7 @@ from airflow.exceptions import AirflowException
 
 from cosmos.core.graph.entities import CosmosEntity, Group, Task
 from cosmos.providers.dbt.core.utils.data_aware_scheduling import get_dbt_dataset
-from cosmos.providers.dbt.parser.project import DbtModelType, DbtProject
+from cosmos.providers.dbt.parser.project import DbtModelType, DbtProject, DbtModel
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +85,7 @@ def render_project(
     # this is the group that will be returned
     base_group = Group(id=dbt_project_name)
     entities: Dict[str, CosmosEntity] = {}  # this is a dict of all the entities we create
+    models_to_render: Dict[str, DbtModel] = {}  # this is a dict of all models we render
 
     # add project_dir arg to task_args
     if execution_mode == "local":
@@ -196,49 +197,47 @@ def render_project(
             logger.error("Unknown dbt type.")
             continue
 
+        # Add model to list models that will render.
+        models_to_render[model_name] = model
+
         # if test_behavior isn't "after_each", we can just add the task to the
         # base group and do nothing else for now
-        if test_behavior != "after_each":
+        if test_behavior != "after_each" or model.type != DbtModelType.DBT_MODEL:
             entities[model_name] = run_task
             base_group.add_entity(entity=run_task)
             continue
 
         # otherwise, we need to make a test task after run tasks and turn them into a group
         entities[run_task.id] = run_task
-
-        if model.type == DbtModelType.DBT_MODEL:
-            test_task = Task(
-                id=f"{model_name}_test",
-                operator_class=calculate_operator_class(
-                    execution_mode=execution_mode,
-                    dbt_class="DbtTest",
-                ),
-                upstream_entity_ids=[run_task.id],
-                arguments=test_args,
-            )
-            entities[test_task.id] = test_task
-            # make the group
-            model_group = Group(
-                id=f"{model_name}",
-                entities=[run_task, test_task],
-            )
-            entities[model_group.id] = model_group
-            base_group.add_entity(entity=model_group)
-
-        # all other non-run tasks don't need to be grouped with test tasks
-        else:
-            entities[model_name] = run_task
-            base_group.add_entity(entity=run_task)
+        test_task = Task(
+            id=f"{model_name}_test",
+            operator_class=calculate_operator_class(
+                execution_mode=execution_mode,
+                dbt_class="DbtTest",
+            ),
+            upstream_entity_ids=[run_task.id],
+            arguments=test_args,
+        )
+        entities[test_task.id] = test_task
+        # make the group
+        model_group = Group(
+            id=f"{model_name}",
+            entities=[run_task, test_task],
+        )
+        entities[model_name] = model_group
+        base_group.add_entity(entity=model_group)
 
     # add dependencies now that we have all the entities
-    for model_name, model in itertools.chain(project.models.items(), project.snapshots.items(), project.seeds.items()):
+    for model_name, model in models_to_render.items():
+        # Only add dependencies if model in `entities`
         upstream_deps = model.config.upstream_models
         for upstream_model_name in upstream_deps:
-            try:
+            if upstream_model_name in entities:
                 dep_task = entities[upstream_model_name]
                 entities[model_name].add_upstream(dep_task)
-            except KeyError:
+            else:
                 logger.error(f"Dependency {upstream_model_name} not found for model {model}")
+
     if test_behavior == "after_all":
         # make a test task
         test_task = Task(
@@ -262,20 +261,14 @@ def render_project(
         base_group.add_entity(test_task)
 
         # add it as an upstream to all the models that don't have downstream tasks
-        # since we don't have downstream info readily available, we have to iterate
-        # start with all models, and remove them as we find downstream tasks
-        models_with_no_downstream_tasks = [model_name for model_name, model in project.models.items()]
+        models_with_no_downstream_tasks = []
+        for model_name, model in models_to_render.items():
+            if model.type == DbtModelType.DBT_MODEL:
+                # if upstream_models not in model_for_render add it to models_with_no_downstream_tasks
+                if not model.config.upstream_models.isdisjoint(set(models_to_render.keys())):
+                    models_with_no_downstream_tasks.append(model_name)
 
-        # iterate over all models
-        for model_name, model in project.models.items():
-            # iterate over all upstream models
-            for upstream_model_name in model.config.upstream_models:
-                # remove the upstream model from the list of models with no downstream tasks
-                try:
-                    models_with_no_downstream_tasks.remove(upstream_model_name)
-                except ValueError:
-                    pass
-
+        print("models_with_no_downstream_tasks", models_with_no_downstream_tasks)
         # add the test task as an upstream to all models with no downstream tasks
         for model_name in models_with_no_downstream_tasks:
             if model_name in entities:
