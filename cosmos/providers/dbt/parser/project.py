@@ -134,7 +134,7 @@ class DbtModel:
                 # check we have a ref - this indicates a dependency
                 if base_node.node.name == "ref" or base_node.node.name == "source":
                     # if it is, get the first argument
-                    first_arg = base_node.args[0]
+                    first_arg = base_node.args[-1]
                     if isinstance(first_arg, jinja2.nodes.Const):
                         # and add it to the config
                         config.upstream_models.add(first_arg.value)
