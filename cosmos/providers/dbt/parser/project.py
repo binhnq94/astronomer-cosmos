@@ -133,7 +133,8 @@ class DbtModel:
             if hasattr(base_node.node, "name"):
                 # check we have a ref - this indicates a dependency
                 if base_node.node.name == "ref":
-                    # if it is, get the first argument
+                    # if it is, get the last argument
+                    # https://docs.getdbt.com/reference/dbt-jinja-functions/ref#two-argument-variant
                     last_arg = base_node.args[-1]
                     if isinstance(last_arg, jinja2.nodes.Const):
                         # and add it to the config
