@@ -68,7 +68,7 @@ def test_render_project_test_behavior_after_all():
     entities_ids = [entity.id for entity in computed.entities]
     expected_ids = [
         "customers_run",
-        "jaffle_shop_test",
+        "dbt_test",
         "orders_run",
         "raw_customers_seed",
         "raw_orders_seed",
