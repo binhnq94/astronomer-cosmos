@@ -36,13 +36,10 @@ class AWSSecretAccessKeyProfileMapping(BaseProfileMapping):
         "role_arn": "extra.role_arn",
         "region": "extra.region_name",
         "access_key_id": "login",
-        "secret_access_key": "password"
+        "secret_access_key": "password",
     }
 
-    secret_fields = [
-        "access_key_id",
-        "secret_access_key"
-    ]
+    secret_fields = ["access_key_id", "secret_access_key"]
 
     @property
     def env_vars(self) -> dict[str, str]:
@@ -57,7 +54,6 @@ class AWSSecretAccessKeyProfileMapping(BaseProfileMapping):
                 env_vars[env_var_name] = str(value)
 
         return env_vars
-
 
     @property
     def profile(self) -> dict[str, Any | None]:
