@@ -39,7 +39,10 @@ class AWSSecretAccessKeyProfileMapping(BaseProfileMapping):
         "secret_access_key": "password",
     }
 
-    secret_fields = ["access_key_id", "secret_access_key"]
+    secret_fields = [
+        "access_key_id",
+        "secret_access_key",
+    ]
 
     @property
     def env_vars(self) -> dict[str, str]:
