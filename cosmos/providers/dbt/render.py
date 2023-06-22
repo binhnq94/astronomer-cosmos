@@ -17,7 +17,7 @@ from airflow.exceptions import AirflowException
 
 from cosmos.core.graph.entities import CosmosEntity, Group, Task
 from cosmos.providers.dbt.core.utils.data_aware_scheduling import get_dbt_dataset
-from cosmos.providers.dbt.parser.project import DbtModelType, DbtProject, DbtModel
+from cosmos.providers.dbt.parser.project import DbtModel, DbtModelType, DbtProject
 
 logger = logging.getLogger(__name__)
 
@@ -232,7 +232,7 @@ def render_project(
         # Only add dependencies if model in `entities`
         upstream_deps = model.config.upstream_models
         for upstream_model_name in upstream_deps:
-            if upstream_model_name in entities:
+            if upstream_model_name in models_to_render:
                 dep_task = entities[upstream_model_name]
                 entities[model_name].add_upstream(dep_task)
             else:
@@ -262,17 +262,14 @@ def render_project(
         base_group.add_entity(test_task)
 
         # add it as an upstream to all the models that don't have downstream tasks
-        models_with_no_downstream_tasks = []
+        models_is_upstream = set()
         for model_name, model in models_to_render.items():
             if model.type == DbtModelType.DBT_MODEL:
-                # if upstream_models not in model_for_render add it to models_with_no_downstream_tasks
-                if not model.config.upstream_models.isdisjoint(set(models_to_render.keys())):
-                    models_with_no_downstream_tasks.append(model_name)
+                models_is_upstream.update(model.config.upstream_models)
 
-        print("models_with_no_downstream_tasks", models_with_no_downstream_tasks)
         # add the test task as an upstream to all models with no downstream tasks
-        for model_name in models_with_no_downstream_tasks:
-            if model_name in entities:
+        for model_name, model in models_to_render.items():
+            if model_name not in models_is_upstream:
                 test_task.add_upstream(entity=entities[model_name])
 
     return base_group
