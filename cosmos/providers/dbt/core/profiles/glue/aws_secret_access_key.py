@@ -9,7 +9,7 @@ from ..base import BaseProfileMapping
 logger = getLogger(__name__)
 
 
-class AWSRoleARNProfileMapping(BaseProfileMapping):
+class AWSSecretAccessKeyProfileMapping(BaseProfileMapping):
     """
     Maps Airflow Aws connections to Glue dbt profiles.
 
@@ -35,7 +35,29 @@ class AWSRoleARNProfileMapping(BaseProfileMapping):
     airflow_param_mapping = {
         "role_arn": "extra.role_arn",
         "region": "extra.region_name",
+        "access_key_id": "login",
+        "secret_access_key": "password"
     }
+
+    secret_fields = [
+        "access_key_id",
+        "secret_access_key"
+    ]
+
+    @property
+    def env_vars(self) -> dict[str, str]:
+        "Returns a dictionary of environment variables that should be set based on self.secret_fields."
+        env_vars = {}
+
+        for field in self.secret_fields:
+            # I re-write env_var_name for BashOperator can understand.
+            env_var_name = f"{self.airflow_connection_type.upper()}_{field.upper()}"
+            value = self.get_dbt_value(field)
+            if value is not None:
+                env_vars[env_var_name] = str(value)
+
+        return env_vars
+
 
     @property
     def profile(self) -> dict[str, Any | None]:

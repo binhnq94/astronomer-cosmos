@@ -10,7 +10,7 @@ from .base import BaseProfileMapping
 from .bigquery.service_account_file import GoogleCloudServiceAccountFileProfileMapping
 from .databricks.token import DatabricksTokenProfileMapping
 from .exasol.user_pass import ExasolUserPasswordProfileMapping
-from .glue import AWSRoleARNProfileMapping
+from .glue import AWSSecretAccessKeyProfileMapping
 from .postgres.user_pass import PostgresUserPasswordProfileMapping
 from .redshift.user_pass import RedshiftUserPasswordProfileMapping
 from .snowflake.user_pass import SnowflakeUserPasswordProfileMapping
@@ -30,7 +30,7 @@ profile_mappings: list[Type[BaseProfileMapping]] = [
     TrinoLDAPProfileMapping,
     TrinoCertificateProfileMapping,
     TrinoJWTProfileMapping,
-    AWSRoleARNProfileMapping,
+    AWSSecretAccessKeyProfileMapping,
 ]
 
 

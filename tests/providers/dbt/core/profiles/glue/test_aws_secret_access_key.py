@@ -4,8 +4,8 @@ import pytest
 from airflow.models.connection import Connection
 
 from cosmos.providers.dbt.core.profiles import get_profile_mapping
-from cosmos.providers.dbt.core.profiles.glue.aws_role_arn import (
-    AWSRoleARNProfileMapping,
+from cosmos.providers.dbt.core.profiles.glue.aws_secret_access_key import (
+    AWSSecretAccessKeyProfileMapping,
 )
 
 
@@ -72,7 +72,7 @@ def test_connection_claiming() -> None:
 
         print("testing with extra:", values)
 
-        profile_mapping = AWSRoleARNProfileMapping(conn, profile_args_potential_values)
+        profile_mapping = AWSSecretAccessKeyProfileMapping(conn, profile_args_potential_values)
         assert not profile_mapping.can_claim_connection()
 
     # if we're missing any of the values in profile args, it shouldn't claim
@@ -83,12 +83,12 @@ def test_connection_claiming() -> None:
 
         print("testing with profile_args", values)
 
-        profile_mapping = AWSRoleARNProfileMapping(conn, values)
+        profile_mapping = AWSSecretAccessKeyProfileMapping(conn, values)
         assert not profile_mapping.can_claim_connection()
 
     # if we have them all, it should claim
     conn = Connection(**connection_attributes, extra=extra_potential_values)  # type: ignore
-    profile_mapping = AWSRoleARNProfileMapping(conn, profile_args_potential_values)
+    profile_mapping = AWSSecretAccessKeyProfileMapping(conn, profile_args_potential_values)
     assert profile_mapping.can_claim_connection()
 
 
@@ -108,7 +108,7 @@ def test_profile_mapping_selected(
             "location": "s3a://my_bucket",
         },
     )
-    assert isinstance(profile_mapping, AWSRoleARNProfileMapping)
+    assert isinstance(profile_mapping, AWSSecretAccessKeyProfileMapping)
 
 
 def test_profile_args(
@@ -184,4 +184,26 @@ def test_profile_args_overrides(
         "schema": "my_schema",
         "session_provisioning_timeout_in_seconds": 120,
         "location": "s3a://my_bucket",
+    }
+
+
+def test_profile_env_vars(
+    mock_aws_connection: Connection,
+) -> None:
+    """
+    Tests that the environment variables get set correctly.
+    """
+    profile_mapping = get_profile_mapping(
+        mock_aws_connection.conn_id,
+        profile_args={
+            "workers": 2,
+            "worker_type": "G1.X",
+            "schema": "my_schema",
+            "session_provisioning_timeout_in_seconds": 120,
+            "location": "s3a://my_bucket",
+        },
+    )
+    assert profile_mapping.env_vars == {
+        "AWS_ACCESS_KEY_ID": mock_aws_connection.login,
+        "AWS_SECRET_ACCESS_KEY": mock_aws_connection.password,
     }

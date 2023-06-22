@@ -1,5 +1,5 @@
 "AWS Airflow connection -> dbt profile mappings"
 
-from .aws_role_arn import AWSRoleARNProfileMapping
+from .aws_secret_access_key import AWSSecretAccessKeyProfileMapping
 
-__all__ = ["AWSRoleARNProfileMapping"]
+__all__ = ["AWSSecretAccessKeyProfileMapping"]
