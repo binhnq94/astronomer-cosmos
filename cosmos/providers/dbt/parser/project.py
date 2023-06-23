@@ -132,7 +132,7 @@ class DbtModel:
         for base_node in ast.find_all(jinja2.nodes.Call):
             if hasattr(base_node.node, "name"):
                 # check we have a ref - this indicates a dependency
-                if base_node.node.name == "ref":
+                if base_node.node.name == "ref" or base_node.node.name == "source":
                     # if it is, get the last argument
                     # https://docs.getdbt.com/reference/dbt-jinja-functions/ref#two-argument-variant
                     last_arg = base_node.args[-1]
