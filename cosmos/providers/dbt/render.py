@@ -249,7 +249,7 @@ def render_project(
             arguments={
                 **task_args,
                 **operator_args,
-                "models": " ".join(list(models_to_render)),
+                "models": " ".join(list(models_to_render.keys())),
                 "profile_args": profile_args,
                 "profile_name": profile_name,
                 "target_name": target_name,
