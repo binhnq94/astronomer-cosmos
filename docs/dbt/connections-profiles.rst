@@ -190,3 +190,14 @@ Certificate
     :undoc-members:
     :members:
     :show-inheritance:
+
+
+AWS Glue's Spark engine
+---------------------
+
+AWS role amazon resource name
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: cosmos.providers.dbt.core.profiles.glue.aws_secret_access_key.AWSSecretAccessKeyProfileMapping
+    :undoc-members:
+    :members:
