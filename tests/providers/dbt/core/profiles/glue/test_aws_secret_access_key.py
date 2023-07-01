@@ -3,8 +3,8 @@ from unittest.mock import patch
 import pytest
 from airflow.models.connection import Connection
 
-from cosmos.providers.dbt.core.profiles import get_profile_mapping
-from cosmos.providers.dbt.core.profiles.glue.aws_secret_access_key import (
+from cosmos.profiles import get_profile_mapping
+from cosmos.profiles.glue.aws_secret_access_key import (
     AWSSecretAccessKeyProfileMapping,
 )
 
