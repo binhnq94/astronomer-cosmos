@@ -165,7 +165,7 @@ def render_project(
         if model.type == DbtModelType.DBT_MODEL:
             # make the run task for model
             run_task = Task(
-                id=f"{model_name}_run",
+                id="run" if test_behavior == "after_each" else f"{model_name}_run",
                 operator_class=calculate_operator_class(
                     execution_mode=execution_mode,
                     dbt_class="DbtRun",
@@ -208,9 +208,9 @@ def render_project(
             continue
 
         # otherwise, we need to make a test task after run tasks and turn them into a group
-        entities[run_task.id] = run_task
+        entities[f"{model_name}.run"] = run_task
         test_task = Task(
-            id=f"{model_name}_test",
+            id="test",
             operator_class=calculate_operator_class(
                 execution_mode=execution_mode,
                 dbt_class="DbtTest",
@@ -218,7 +218,7 @@ def render_project(
             upstream_entity_ids=[run_task.id],
             arguments=test_args,
         )
-        entities[test_task.id] = test_task
+        entities[f"{model_name}.test"] = test_task
         # make the group
         model_group = Group(
             id=f"{model_name}",
