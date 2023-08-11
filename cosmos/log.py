@@ -23,8 +23,9 @@ def get_logger(name: str | None = None) -> logging.Logger:
     By using this logger, we introduce a (yellow) astronomer-cosmos string into the project's log messages:
     [2023-08-09T14:20:55.532+0100] {subprocess.py:94} INFO - (astronomer-cosmos) - 13:20:55  Completed successfully
     """
+
     logger = logging.getLogger(name)
-    logger.propagate = False
+    # logger.propagate = False
     formatter: logging.Formatter = CustomTTYColoredFormatter(fmt=LOG_FORMAT)  # type: ignore
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
