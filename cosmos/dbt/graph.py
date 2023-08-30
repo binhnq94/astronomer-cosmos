@@ -141,6 +141,7 @@ class DbtGraph:
         if not shutil.which(self.dbt_cmd):
             raise CosmosLoadDbtException(f"Unable to find the dbt executable: {self.dbt_cmd}")
 
+        deps_command = [self.dbt_cmd, "deps"]
         command = [self.dbt_cmd, "ls", "--output", "json"]
 
         if self.exclude:
@@ -151,6 +152,18 @@ class DbtGraph:
 
         with self.profile_config.ensure_profile() as profile_values:
             (profile_path, env_vars) = profile_values
+            deps_command.extend(
+                [
+                    "--project-dir",
+                    str(self.project.dir),
+                    "--profiles-dir",
+                    str(profile_path.parent),
+                    "--profile",
+                    self.profile_config.profile_name,
+                    "--target",
+                    self.profile_config.target_name,
+                ]
+            )
             command.extend(
                 [
                     "--project-dir",
@@ -174,6 +187,19 @@ class DbtGraph:
                 target_dir = Path(env.get(DBT_TARGET_PATH_ENVVAR) or tmpdir)
                 env[DBT_LOG_PATH_ENVVAR] = str(log_dir)
                 env[DBT_TARGET_PATH_ENVVAR] = str(target_dir)
+
+                process = Popen(
+                    deps_command,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=tmpdir,
+                    universal_newlines=True,
+                    env=env,
+                )
+                stdout, stderr = process.communicate()
+                if stderr or "Runtime Error" in stdout:
+                    details = stderr or stdout
+                    raise CosmosLoadDbtException(f"Unable to run the deps command due to the error:\n{details}")
 
                 process = Popen(
                     command,
